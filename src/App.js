@@ -58,8 +58,7 @@ export default function App () {
                 </div>
                 <div className="col-11 bg-light-subtle" style={canvasContainerStyles}>
                     <DndContext
-                        onDragStart={(e) => console.log(e)}
-                        nDragEnd={handleDragEnd}
+                        onDragEnd={handleDragEnd}
                         modifiers={[snapToGridModifier, restrictToParentElement]}
                         sensors={sensors}
                     >

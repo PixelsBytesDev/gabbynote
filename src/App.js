@@ -1,9 +1,10 @@
 import {DndContext, MouseSensor, useSensor, useSensors} from '@dnd-kit/core';
-import {createSnapModifier} from '@dnd-kit/modifiers';
+import { createSnapModifier, restrictToParentElement } from '@dnd-kit/modifiers';
 import MDEditor from '@uiw/react-md-editor';
 import {Draggable} from './Draggable';
 import {useState} from "react";
 import useProjectReducer from "./hooks/useProjectReducer";
+import TipTapEditor from "./components/TipTapEditor";
 
 export default function App () {
     const {
@@ -13,8 +14,11 @@ export default function App () {
     } = useProjectReducer();
     const gridSize = 20; // pixels
     const snapToGridModifier = createSnapModifier(gridSize);
-    const [value, setValue] = useState("**Hello world!!!**");
-    const mouseSensor = useSensor(MouseSensor, {})
+    const mouseSensor = useSensor(MouseSensor, {
+        activationConstraint: {
+            distance: 100
+        }
+    });
     const sensors = useSensors(mouseSensor)
 
     function handleDragEnd(ev) {
@@ -29,23 +33,36 @@ export default function App () {
     }
 
     function handleUpdateNote (e, note) {
+        console.log(e);
         const selectedNote = state.notes.find((x) => x.id === note.id);
         selectedNote.content = e;
         updateNote(selectedNote);
     }
+
+    const canvasContainerStyles = {
+        position: 'relative',
+        backgroundImage: "radial-gradient(gray 1px, transparent 0)",
+        backgroundSize: "20px 20px",
+        backgroundPosition: "-19px -19px"
+    };
 
     return (
         <div className="container-fluid vh-100">
             <div className="row h-100">
                 <div className="col-1 pt-5 bg-secondary-subtle">
                     <div className="d-flex justify-content-center flex-column">
-                        <button onClick={() => handleAddButton()} className="btn btn-primary">
+                        <button onClick={() => handleAddButton()} className="btn btn-secondary">
                             <i className="bi-journal-plus" style={{ fontSize: "1.5rem" }}></i>
                         </button>
                     </div>
                 </div>
-                <div className="col-10" style={{ position: 'relative' }}>
-                    <DndContext onDragEnd={handleDragEnd} modifiers={[snapToGridModifier]} sensors={sensors}>
+                <div className="col-11 bg-light-subtle" style={canvasContainerStyles}>
+                    <DndContext
+                        onDragStart={(e) => console.log(e)}
+                        nDragEnd={handleDragEnd}
+                        modifiers={[snapToGridModifier, restrictToParentElement]}
+                        sensors={sensors}
+                    >
                         {state.notes && state.notes.map((note) => (
                             <Draggable
                                 styles={{
@@ -57,12 +74,7 @@ export default function App () {
                                 id={note.id}
                                 content={note.content}
                             >
-                                <MDEditor
-                                    style={{ height: "100%" }}
-                                    value={note.content}
-                                    onChange={(e) => handleUpdateNote(e, note)}
-                                    height={"100%"}
-                                />
+                                <TipTapEditor content={note.content} onUpdate={({ textContent, htmlContent }) => handleUpdateNote(htmlContent, note)} />
                             </Draggable>
                         ))}
                     </DndContext>

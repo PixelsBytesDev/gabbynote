@@ -3,8 +3,9 @@ import {useDraggable} from "@dnd-kit/core";
 const CustomStyle = {
     display: "flex",
     width: "400px",
-    height: "400px",
-    backgroundColor: "#e8e8a2"
+    height: "auto",
+    backgroundColor: "#adb5bd",
+    padding: '25px'
 };
 
 export function Draggable({ id, content, styles, children }) {
@@ -17,7 +18,7 @@ export function Draggable({ id, content, styles, children }) {
             transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`
         }
         : {};
-
+    console.log(listeners);
     return (
         <div
             ref={setNodeRef}
